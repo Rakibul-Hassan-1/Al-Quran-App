@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
 import type { SurahMeta } from "@/types";
-import { cn } from "@/lib/utils";
+import { Search, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface Props {
   surahs: SurahMeta[];
@@ -22,7 +22,7 @@ export default function SurahSidebar({ surahs }: Props) {
       s.englishName.toLowerCase().includes(filter.toLowerCase()) ||
       s.englishNameTranslation.toLowerCase().includes(filter.toLowerCase()) ||
       s.name.includes(filter) ||
-      String(s.number).includes(filter)
+      String(s.number).includes(filter),
   );
 
   const currentId = pathname?.split("/surah/")?.[1];
@@ -42,8 +42,10 @@ export default function SurahSidebar({ surahs }: Props) {
         "transition-all duration-300 overflow-hidden",
         // Desktop: inline; Mobile: fixed overlay
         "lg:relative lg:translate-x-0",
-        "fixed top-0 left-14 bottom-0 z-30 lg:z-auto",
-        isSurahSidebarOpen ? "translate-x-0" : "-translate-x-full lg:-translate-x-full lg:w-0"
+        "fixed top-16 left-0 bottom-0 z-40 lg:top-0 lg:left-14 lg:z-auto",
+        isSurahSidebarOpen
+          ? "translate-x-0"
+          : "-translate-x-full lg:-translate-x-full lg:w-0",
       )}
     >
       {/* Header */}
@@ -62,7 +64,10 @@ export default function SurahSidebar({ surahs }: Props) {
 
         {/* Filter */}
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5e6485]" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5e6485]"
+          />
           <input
             type="text"
             value={filter}
@@ -84,7 +89,7 @@ export default function SurahSidebar({ surahs }: Props) {
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 text-left",
                 "hover:bg-[#2a2f47] transition-colors",
-                isActive && "bg-[#21253a] border-r-2 border-[#c9a84c]"
+                isActive && "bg-[#21253a] border-r-2 border-[#c9a84c]",
               )}
             >
               {/* Number badge */}
@@ -93,7 +98,7 @@ export default function SurahSidebar({ surahs }: Props) {
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0",
                   isActive
                     ? "bg-[#c9a84c] text-[#0f1117]"
-                    : "bg-[#2d3250] text-[#9da3c0]"
+                    : "bg-[#2d3250] text-[#9da3c0]",
                 )}
               >
                 {surah.number}
@@ -102,7 +107,12 @@ export default function SurahSidebar({ surahs }: Props) {
               {/* Names */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium truncate", isActive ? "text-[#e8e8f0]" : "text-[#9da3c0]")}>
+                  <span
+                    className={cn(
+                      "text-sm font-medium truncate",
+                      isActive ? "text-[#e8e8f0]" : "text-[#9da3c0]",
+                    )}
+                  >
                     {surah.englishName}
                   </span>
                   <span
@@ -114,14 +124,20 @@ export default function SurahSidebar({ surahs }: Props) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-[#5e6485]">{surah.englishNameTranslation}</span>
+                  <span className="text-xs text-[#5e6485]">
+                    {surah.englishNameTranslation}
+                  </span>
                   <span className="text-xs text-[#5e6485]">·</span>
-                  <span className="text-xs text-[#5e6485]">{surah.numberOfAyahs} verses</span>
+                  <span className="text-xs text-[#5e6485]">
+                    {surah.numberOfAyahs} verses
+                  </span>
                   <span className="text-xs text-[#5e6485]">·</span>
                   <span
                     className={cn(
                       "text-xs",
-                      surah.revelationType === "Meccan" ? "text-[#4caf82]" : "text-[#5b8dee]"
+                      surah.revelationType === "Meccan"
+                        ? "text-[#4caf82]"
+                        : "text-[#5b8dee]",
                     )}
                   >
                     {surah.revelationType}

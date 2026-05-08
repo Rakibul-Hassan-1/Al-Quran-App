@@ -3,37 +3,28 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  BookOpen,
-  Search,
-  Settings,
-  List,
-  Home,
-  Bookmark,
-  Moon,
-  HelpCircle,
+  BookOpen, Search, Settings, List, Bookmark, Sun, Moon, HelpCircle,
 } from "lucide-react";
-import { useUIStore } from "@/store";
+import { useUIStore, useThemeStore } from "@/store";
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  icon: React.ElementType;
-  label: string;
-  action?: () => void;
-  href?: string;
-}
 
 export default function IconSidebar() {
   const { toggleSurahSidebar, toggleSearch, toggleSettingsPanel } = useUIStore();
+  const { isDark, toggle } = useThemeStore();
 
-  const topItems: NavItem[] = [
+  const topItems = [
     { icon: List, label: "Surah List", action: toggleSurahSidebar },
     { icon: Search, label: "Search", action: toggleSearch },
     { icon: Bookmark, label: "Bookmarks" },
   ];
 
-  const bottomItems: NavItem[] = [
-    { icon: Settings, label: "Settings", action: toggleSettingsPanel },
-    { icon: HelpCircle, label: "Help" },
+  const bottomItems = [
+    { icon: Settings, label: "Font Settings", action: toggleSettingsPanel },
+    {
+      icon: isDark ? Sun : Moon,
+      label: isDark ? "Light Mode" : "Dark Mode",
+      action: toggle,
+    },
   ];
 
   return (
@@ -62,7 +53,7 @@ export default function IconSidebar() {
   );
 }
 
-function SidebarButton({ item }: { item: NavItem }) {
+function SidebarButton({ item }: { item: { icon: React.ElementType; label: string; action?: () => void; href?: string } }) {
   const Icon = item.icon;
 
   const button = (
@@ -76,16 +67,12 @@ function SidebarButton({ item }: { item: NavItem }) {
       )}
     >
       <Icon size={20} />
-      {/* Tooltip */}
       <span className="absolute left-12 bg-[#21253a] text-[#e8e8f0] text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-[#2d3250]">
         {item.label}
       </span>
     </button>
   );
 
-  if (item.href) {
-    return <Link href={item.href}>{button}</Link>;
-  }
-
+  if (item.href) return <Link href={item.href}>{button}</Link>;
   return button;
 }

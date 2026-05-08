@@ -3,21 +3,22 @@
 @tailwind utilities;
 
 /* Arabic Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap");
 
 /* KFGQ Font (Quran-specific) */
 @font-face {
-  font-family: 'KFGQPC';
-  src: url('https://cdn.jsdelivr.net/gh/aliftype/amiri@0.113/tests/data/Amiri-Regular.ttf') format('truetype');
+  font-family: "KFGQPC";
+  src: url("https://cdn.jsdelivr.net/gh/aliftype/amiri@0.113/tests/data/Amiri-Regular.ttf")
+    format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 :root {
-  --font-amiri: 'Amiri', serif;
-  --font-kfgq: 'KFGQPC', 'Amiri', serif;
-  --font-scheherazade: 'Scheherazade New', serif;
+  --font-amiri: "Amiri", serif;
+  --font-kfgq: "KFGQPC", "Amiri", serif;
+  --font-scheherazade: "Scheherazade New", serif;
 
   --bg: #0f1117;
   --surface: #1a1d27;
@@ -67,13 +68,21 @@ body {
   direction: rtl;
   text-align: right;
   line-height: 2.2;
-  font-feature-settings: "kern" 1, "liga" 1;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
   -webkit-font-smoothing: antialiased;
 }
 
-.arabic-font-amiri { font-family: 'Amiri', serif; }
-.arabic-font-kfgq { font-family: 'KFGQPC', 'Amiri', serif; }
-.arabic-font-scheherazade { font-family: 'Scheherazade New', serif; }
+.arabic-font-amiri {
+  font-family: "Amiri", serif;
+}
+.arabic-font-kfgq {
+  font-family: "KFGQPC", "Amiri", serif;
+}
+.arabic-font-scheherazade {
+  font-family: "Scheherazade New", serif;
+}
 
 /* Verse number badge */
 .verse-badge {
@@ -111,4 +120,51 @@ body {
   transition-property: background-color, border-color, color, opacity;
   transition-duration: 150ms;
   transition-timing-function: ease;
+}
+
+/* ── Light Mode ───────────────────────────────────────────── */
+html.light {
+  --bg: #f5f2ea;
+  --surface: #fffdf8;
+  --card: #f8f4ec;
+  --border: #ddd5c7;
+  --hover: #eee7da;
+  --text-primary: #111111;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --accent-gold: #9a6f1e;
+  --accent-gold-light: #b8860b;
+}
+
+html.light body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+html.light .bg-\[\#0f1117\] {
+  background-color: var(--bg) !important;
+}
+html.light .bg-\[\#1a1d27\] {
+  background-color: var(--surface) !important;
+}
+html.light .bg-\[\#21253a\] {
+  background-color: var(--card) !important;
+}
+html.light .border-\[\#2d3250\] {
+  border-color: var(--border) !important;
+}
+html.light .text-\[\#e8e8f0\] {
+  color: var(--text-primary) !important;
+}
+html.light .text-\[\#9da3c0\] {
+  color: var(--text-secondary) !important;
+}
+html.light .text-\[\#5e6485\] {
+  color: var(--text-muted) !important;
+}
+html.light .hover\:bg-\[\#2a2f47\]:hover {
+  background-color: var(--hover) !important;
+}
+html.light .bg-\[\#2d3250\] {
+  background-color: var(--border) !important;
 }

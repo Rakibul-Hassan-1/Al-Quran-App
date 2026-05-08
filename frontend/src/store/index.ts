@@ -86,3 +86,26 @@ export const useUIStore = create<UIStore>((set) => ({
     })),
   setSearchOpen: (open) => set({ isSearchOpen: open }),
 }));
+
+// ── Theme Store ───────────────────────────────────────────────
+interface ThemeStore {
+  isDark: boolean;
+  toggle: () => void;
+}
+
+export const useThemeStore = create<ThemeStore>()(
+  persist(
+    (set, get) => ({
+      isDark: true,
+      toggle: () => {
+        const next = !get().isDark;
+        set({ isDark: next });
+        if (typeof document !== "undefined") {
+          document.documentElement.classList.toggle("dark", next);
+          document.documentElement.classList.toggle("light", !next);
+        }
+      },
+    }),
+    { name: "quran-theme" }
+  )
+);

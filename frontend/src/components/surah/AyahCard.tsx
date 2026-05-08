@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Play, Pause, Loader2, Copy, Check } from "lucide-react";
-import type { Ayah, ArabicFont } from "@/types";
 import { useAudio } from "@/hooks/useAudio";
 import { cn } from "@/lib/utils";
+import type { ArabicFont, Ayah } from "@/types";
+import { Check, Copy, Loader2, Pause, Play } from "lucide-react";
+import { useState } from "react";
 
 interface Props {
   ayah: Ayah;
@@ -13,7 +13,12 @@ interface Props {
   translationFontSize: number;
 }
 
-export default function AyahCard({ ayah, arabicFont, arabicFontSize, translationFontSize }: Props) {
+export default function AyahCard({
+  ayah,
+  arabicFont,
+  arabicFontSize,
+  translationFontSize,
+}: Props) {
   const { playAyah, isThisAyahPlaying, isThisAyahLoading } = useAudio();
   const [copied, setCopied] = useState(false);
 
@@ -25,11 +30,13 @@ export default function AyahCard({ ayah, arabicFont, arabicFontSize, translation
     arabicFont === "amiri"
       ? "Amiri, serif"
       : arabicFont === "scheherazade"
-      ? "'Scheherazade New', serif"
-      : "Amiri, serif";
+        ? "'Scheherazade New', serif"
+        : "Amiri, serif";
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(`${ayah.text}\n\n${ayah.translation}\n[Quran ${ayah.surahNumber}:${ayah.number}]`);
+    await navigator.clipboard.writeText(
+      `${ayah.text}\n\n${ayah.translation}\n[Quran ${ayah.surahNumber}:${ayah.number}]`,
+    );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -38,7 +45,7 @@ export default function AyahCard({ ayah, arabicFont, arabicFontSize, translation
     <div
       className={cn(
         "group border-b border-[#2d3250] py-5 px-2 hover:bg-[#1a1d27]/50 rounded-lg transition-colors",
-        playing && "bg-[#1a1d27]/80 border-l-2 border-l-[#c9a84c] pl-3"
+        playing && "bg-[#1a1d27]/80 border-l-2 border-l-[#c9a84c] pl-3",
       )}
     >
       {/* Verse number row */}
@@ -47,23 +54,27 @@ export default function AyahCard({ ayah, arabicFont, arabicFontSize, translation
         <div className="verse-badge text-[11px]">{ayah.number}</div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleCopy}
             title="Copy verse"
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#1a1d27] border border-[#2d3250] text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47] transition-colors"
           >
-            {copied ? <Check size={14} className="text-[#4caf82]" /> : <Copy size={14} />}
+            {copied ? (
+              <Check size={14} className="text-[#4caf82]" />
+            ) : (
+              <Copy size={14} />
+            )}
           </button>
 
           <button
             onClick={() => playAyah(ayahId, ayah.audioUrl)}
             title={playing ? "Pause" : "Play recitation"}
             className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+              "w-8 h-8 rounded-lg flex items-center justify-center border transition-colors",
               playing
-                ? "bg-[#c9a84c] text-[#0f1117]"
-                : "text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47]"
+                ? "bg-[#c9a84c] border-[#c9a84c] text-[#0f1117]"
+                : "bg-[#1a1d27] border-[#2d3250] text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47]",
             )}
           >
             {loading ? (
@@ -82,7 +93,11 @@ export default function AyahCard({ ayah, arabicFont, arabicFontSize, translation
         className="text-[#e8e8f0] leading-loose text-right mb-4"
         dir="rtl"
         lang="ar"
-        style={{ fontSize: `${arabicFontSize}px`, fontFamily: arabicFontFamily, lineHeight: "2.4" }}
+        style={{
+          fontSize: `${arabicFontSize}px`,
+          fontFamily: arabicFontFamily,
+          lineHeight: "2.4",
+        }}
       >
         {ayah.text}
       </p>
