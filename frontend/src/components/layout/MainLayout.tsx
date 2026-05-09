@@ -2,7 +2,16 @@
 
 import { useThemeStore, useUIStore } from "@/store";
 import type { SurahMeta } from "@/types";
-import { BookOpen, Menu, Moon, Search, Settings, Sun } from "lucide-react";
+import {
+  BookOpen,
+  Bookmark,
+  Menu,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+} from "lucide-react";
+import BookmarksPanel from "../bookmarks/BookmarksPanel";
 import SearchPanel from "../search/SearchPanel";
 import SettingsPanel from "../settings/SettingsPanel";
 import IconSidebar from "./IconSidebar";
@@ -14,7 +23,14 @@ interface Props {
 }
 
 export default function MainLayout({ surahs, children }: Props) {
-  const { isSettingsPanelOpen, isSearchOpen } = useUIStore();
+  const { isSettingsPanelOpen, isSearchOpen, isBookmarksOpen } = useUIStore();
+  const activeRightPanel = isSettingsPanelOpen
+    ? "settings"
+    : isSearchOpen
+      ? "search"
+      : isBookmarksOpen
+        ? "bookmarks"
+        : null;
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0f1117]">
@@ -35,8 +51,9 @@ export default function MainLayout({ surahs, children }: Props) {
       </main>
 
       {/* Right panels */}
-      {isSettingsPanelOpen && <SettingsPanel />}
-      {isSearchOpen && <SearchPanel />}
+      {activeRightPanel === "settings" && <SettingsPanel />}
+      {activeRightPanel === "search" && <SearchPanel />}
+      {activeRightPanel === "bookmarks" && <BookmarksPanel />}
 
       {/* Mobile overlay */}
       <MobileOverlay />
@@ -45,8 +62,12 @@ export default function MainLayout({ surahs, children }: Props) {
 }
 
 function MobileHeader() {
-  const { toggleSurahSidebar, toggleSearch, toggleSettingsPanel } =
-    useUIStore();
+  const {
+    toggleSurahSidebar,
+    toggleSearch,
+    toggleSettingsPanel,
+    toggleBookmarks,
+  } = useUIStore();
   const { isDark, toggle } = useThemeStore();
 
   return (
@@ -77,12 +98,21 @@ function MobileHeader() {
         <button
           onClick={toggleSettingsPanel}
           className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#1a1d27] border border-[#2d3250] text-[#9da3c0] hover:text-[#e8e8f0] hover:bg-[#2a2f47] transition-colors"
+          title="Settings"
         >
           <Settings size={18} />
         </button>
         <button
+          onClick={toggleBookmarks}
+          className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#1a1d27] border border-[#2d3250] text-[#9da3c0] hover:text-[#e8e8f0] hover:bg-[#2a2f47] transition-colors"
+          title="Bookmarks"
+        >
+          <Bookmark size={18} />
+        </button>
+        <button
           onClick={toggle}
           className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#1a1d27] border border-[#2d3250] text-[#9da3c0] hover:text-[#e8e8f0] hover:bg-[#2a2f47] transition-colors"
+          title={isDark ? "Light Mode" : "Dark Mode"}
         >
           {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>

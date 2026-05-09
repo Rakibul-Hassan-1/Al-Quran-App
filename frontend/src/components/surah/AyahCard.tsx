@@ -2,8 +2,9 @@
 
 import { useAudio } from "@/hooks/useAudio";
 import { cn } from "@/lib/utils";
+import { useAppSettingsStore, useBookmarkStore } from "@/store";
 import type { ArabicFont, Ayah } from "@/types";
-import { Check, Copy, Loader2, Pause, Play } from "lucide-react";
+import { Bookmark, Check, Copy, Loader2, Pause, Play } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -11,6 +12,11 @@ interface Props {
   arabicFont: ArabicFont;
   arabicFontSize: number;
   translationFontSize: number;
+  surahName: string;
+  surahEnglishName: string;
+  cardId?: string;
+  isActive?: boolean;
+  isPopped?: boolean;
 }
 
 export default function AyahCard({
@@ -18,13 +24,22 @@ export default function AyahCard({
   arabicFont,
   arabicFontSize,
   translationFontSize,
+  surahName,
+  surahEnglishName,
+  cardId,
+  isActive = false,
+  isPopped = false,
 }: Props) {
   const { playAyah, isThisAyahPlaying, isThisAyahLoading } = useAudio();
+  const { toggleBookmark, isBookmarked } = useBookmarkStore();
   const [copied, setCopied] = useState(false);
 
   const ayahId = `${ayah.surahNumber}:${ayah.number}`;
   const playing = isThisAyahPlaying(ayahId);
   const loading = isThisAyahLoading(ayahId);
+  const bookmarked = isBookmarked(ayahId);
+  const showBangla = useAppSettingsStore((s) => s.showBanglaTranslation);
+  const banglaPrimary = useAppSettingsStore((s) => s.banglaPrimary);
 
   const arabicFontFamily =
     arabicFont === "amiri"
@@ -34,27 +49,70 @@ export default function AyahCard({
         : "Amiri, serif";
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(
-      `${ayah.text}\n\n${ayah.translation}\n[Quran ${ayah.surahNumber}:${ayah.number}]`,
-    );
+    const primaryIsBangla = banglaPrimary && ayah.banglaTranslation;
+    const primaryText = primaryIsBangla
+      ? ayah.banglaTranslation!
+      : ayah.translation;
+    const secondaryText = showBangla
+      ? primaryIsBangla
+        ? ayah.translation
+        : ayah.banglaTranslation
+      : undefined;
+
+    let copyText = `${ayah.text}\n\n${primaryText}\n[Quran ${ayah.surahNumber}:${ayah.number}]`;
+    if (secondaryText)
+      copyText = `${ayah.text}\n\n${primaryText}\n\nOther: ${secondaryText}\n[Quran ${ayah.surahNumber}:${ayah.number}]`;
+
+    await navigator.clipboard.writeText(copyText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleBookmark() {
+    toggleBookmark({
+      id: ayahId,
+      surahNumber: ayah.surahNumber,
+      surahName,
+      surahEnglishName,
+      ayahNumber: ayah.number,
+      text: ayah.text,
+      translation: ayah.translation,
+      banglaTranslation: ayah.banglaTranslation,
+    });
+  }
+
   return (
     <div
+      id={cardId}
       className={cn(
-        "group border-b border-[#2d3250] py-5 px-2 hover:bg-[#1a1d27]/50 rounded-lg transition-colors",
-        playing && "bg-[#1a1d27]/80 border-l-2 border-l-[#c9a84c] pl-3",
+        "group rounded-lg transition-all duration-300",
+        isActive
+          ? "bg-gradient-to-r from-[#2b3047] to-[#22283b] border border-[#3f476b] px-4 py-5 shadow-[0_0_0_1px_rgba(201,168,76,0.2)]"
+          : "border-b border-[#2d3250] py-5 px-2 hover:bg-[#1a1d27]/50",
+        isPopped && "ayah-pop-highlight",
       )}
     >
       {/* Verse number row */}
       <div className="flex items-center justify-between mb-4">
         {/* Verse badge */}
-        <div className="verse-badge text-[11px]">{ayah.number}</div>
+        <div
+          className={cn(
+            "verse-badge text-[11px]",
+            isActive && "border-[#c9a84c] text-[#f2d98f]",
+          )}
+        >
+          {ayah.number}
+        </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+        <div
+          className={cn(
+            "flex items-center gap-2 transition-opacity",
+            isActive
+              ? "opacity-100"
+              : "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+          )}
+        >
           <button
             onClick={handleCopy}
             title="Copy verse"
@@ -65,6 +123,19 @@ export default function AyahCard({
             ) : (
               <Copy size={14} />
             )}
+          </button>
+
+          <button
+            onClick={handleBookmark}
+            title={bookmarked ? "Remove bookmark" : "Add bookmark"}
+            className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center border transition-colors",
+              bookmarked
+                ? "bg-[#c9a84c]/15 border-[#c9a84c]/60 text-[#f2d98f]"
+                : "bg-[#1a1d27] border-[#2d3250] text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47]",
+            )}
+          >
+            <Bookmark size={14} fill={bookmarked ? "currentColor" : "none"} />
           </button>
 
           <button
@@ -90,7 +161,10 @@ export default function AyahCard({
 
       {/* Arabic text */}
       <p
-        className="text-[#e8e8f0] leading-loose text-right mb-4"
+        className={cn(
+          "leading-loose text-right mb-4",
+          isActive ? "text-[#fff2cc]" : "text-[#e8e8f0]",
+        )}
         dir="rtl"
         lang="ar"
         style={{
@@ -102,13 +176,45 @@ export default function AyahCard({
         {ayah.text}
       </p>
 
-      {/* Translation */}
-      <p
-        className="text-[#9da3c0] leading-relaxed"
-        style={{ fontSize: `${translationFontSize}px` }}
-      >
-        {ayah.translation}
-      </p>
+      {/* Translation (primary/secondary based on settings) */}
+      {(() => {
+        const primaryIsBangla = banglaPrimary && ayah.banglaTranslation;
+        const primaryText = primaryIsBangla
+          ? ayah.banglaTranslation!
+          : ayah.translation;
+        const secondaryText = showBangla
+          ? primaryIsBangla
+            ? ayah.translation
+            : ayah.banglaTranslation
+          : undefined;
+
+        return (
+          <div>
+            <p
+              className={cn(
+                "leading-relaxed",
+                isActive ? "text-[#e3e7fa]" : "text-[#9da3c0]",
+              )}
+              style={{ fontSize: `${translationFontSize}px` }}
+            >
+              {primaryText}
+            </p>
+            {secondaryText ? (
+              <p
+                className={cn(
+                  "leading-relaxed mt-2 text-sm",
+                  isActive ? "text-[#e3e7fa]/90" : "text-[#9da3c0]/80",
+                )}
+                style={{
+                  fontSize: `${Math.max(12, translationFontSize - 2)}px`,
+                }}
+              >
+                {secondaryText}
+              </p>
+            ) : null}
+          </div>
+        );
+      })()}
     </div>
   );
 }

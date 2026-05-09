@@ -1,14 +1,34 @@
 "use client";
 
-import { X, RotateCcw } from "lucide-react";
-import { useFontStore, useUIStore } from "@/store";
-import type { ArabicFont } from "@/types";
 import { cn } from "@/lib/utils";
+import { useAppSettingsStore, useFontStore, useUIStore } from "@/store";
+import type { ArabicFont } from "@/types";
+import { RotateCcw, X } from "lucide-react";
 
-const FONTS: { id: ArabicFont; label: string; sample: string; fontFamily: string }[] = [
-  { id: "amiri", label: "Amiri", sample: "بِسْمِ اللَّهِ", fontFamily: "Amiri, serif" },
-  { id: "scheherazade", label: "Scheherazade New", sample: "بِسْمِ اللَّهِ", fontFamily: "'Scheherazade New', serif" },
-  { id: "kfgq", label: "KFGQPC", sample: "بِسْمِ اللَّهِ", fontFamily: "KFGQPC, Amiri, serif" },
+const FONTS: {
+  id: ArabicFont;
+  label: string;
+  sample: string;
+  fontFamily: string;
+}[] = [
+  {
+    id: "amiri",
+    label: "Amiri",
+    sample: "بِسْمِ اللَّهِ",
+    fontFamily: "Amiri, serif",
+  },
+  {
+    id: "scheherazade",
+    label: "Scheherazade New",
+    sample: "بِسْمِ اللَّهِ",
+    fontFamily: "'Scheherazade New', serif",
+  },
+  {
+    id: "kfgq",
+    label: "KFGQPC",
+    sample: "بِسْمِ اللَّهِ",
+    fontFamily: "KFGQPC, Amiri, serif",
+  },
 ];
 
 export default function SettingsPanel() {
@@ -22,6 +42,8 @@ export default function SettingsPanel() {
     setTranslationFontSize,
     reset,
   } = useFontStore();
+  const { showBanglaTranslation, setShowBanglaTranslation } =
+    useAppSettingsStore();
 
   return (
     <aside className="w-72 flex-shrink-0 bg-[#1a1d27] border-l border-[#2d3250] flex flex-col animate-slide-in">
@@ -60,7 +82,7 @@ export default function SettingsPanel() {
                   "w-full rounded-xl p-3 border text-right transition-all",
                   arabicFont === font.id
                     ? "border-[#c9a84c] bg-[#c9a84c]/10"
-                    : "border-[#2d3250] hover:border-[#5e6485] bg-[#0f1117]"
+                    : "border-[#2d3250] hover:border-[#5e6485] bg-[#0f1117]",
                 )}
               >
                 <div
@@ -70,10 +92,33 @@ export default function SettingsPanel() {
                 >
                   {font.sample}
                 </div>
-                <div className="text-xs text-left text-[#5e6485]">{font.label}</div>
+                <div className="text-xs text-left text-[#5e6485]">
+                  {font.label}
+                </div>
               </button>
             ))}
           </div>
+        </section>
+
+        {/* Bangla Translation Toggle */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#5e6485]">
+              Bangla Translation
+            </h3>
+            <div className="flex items-center gap-3">
+              <label className="text-xs text-[#9da3c0]">Show</label>
+              <input
+                type="checkbox"
+                checked={showBanglaTranslation}
+                onChange={(e) => setShowBanglaTranslation(e.target.checked)}
+                className="w-5 h-5 accent-[#c9a84c]"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-[#5e6485]">
+            Toggle display of Bangla translations in verse view and bookmarks.
+          </p>
         </section>
 
         {/* Arabic Font Size */}
@@ -108,8 +153,8 @@ export default function SettingsPanel() {
                 arabicFont === "amiri"
                   ? "Amiri, serif"
                   : arabicFont === "scheherazade"
-                  ? "'Scheherazade New', serif"
-                  : "Amiri, serif",
+                    ? "'Scheherazade New', serif"
+                    : "Amiri, serif",
               lineHeight: 2,
             }}
             dir="rtl"
@@ -146,7 +191,8 @@ export default function SettingsPanel() {
             className="mt-3 text-[#9da3c0] bg-[#0f1117] rounded-lg p-3"
             style={{ fontSize: `${translationFontSize}px`, lineHeight: 1.6 }}
           >
-            In the name of Allah, the Entirely Merciful, the Especially Merciful.
+            In the name of Allah, the Entirely Merciful, the Especially
+            Merciful.
           </p>
         </section>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
+import type { ArabicFont, FontSettings } from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ArabicFont, FontSettings } from "@/types";
 
 // ── Font Settings Store ────────────────────────────────────────
 interface FontStore extends FontSettings {
@@ -27,17 +27,21 @@ export const useFontStore = create<FontStore>()(
       setTranslationFontSize: (size) => set({ translationFontSize: size }),
       reset: () => set(DEFAULT_FONT_SETTINGS),
     }),
-    { name: "quran-font-settings" }
-  )
+    { name: "quran-font-settings" },
+  ),
 );
 
 // ── Audio Store ────────────────────────────────────────────────
 interface AudioStore {
   currentAyahId: string | null;
+  currentSurahNumber: number | null;
+  playbackMode: "ayah" | "surah" | null;
   isPlaying: boolean;
   isLoading: boolean;
   audio: HTMLAudioElement | null;
   setCurrentAyah: (id: string | null) => void;
+  setCurrentSurahNumber: (surahNumber: number | null) => void;
+  setPlaybackMode: (mode: "ayah" | "surah" | null) => void;
   setIsPlaying: (playing: boolean) => void;
   setIsLoading: (loading: boolean) => void;
   setAudio: (audio: HTMLAudioElement | null) => void;
@@ -45,10 +49,15 @@ interface AudioStore {
 
 export const useAudioStore = create<AudioStore>((set) => ({
   currentAyahId: null,
+  currentSurahNumber: null,
+  playbackMode: null,
   isPlaying: false,
   isLoading: false,
   audio: null,
   setCurrentAyah: (id) => set({ currentAyahId: id }),
+  setCurrentSurahNumber: (surahNumber) =>
+    set({ currentSurahNumber: surahNumber }),
+  setPlaybackMode: (mode) => set({ playbackMode: mode }),
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setAudio: (audio) => set({ audio }),
@@ -59,33 +68,118 @@ interface UIStore {
   isSurahSidebarOpen: boolean;
   isSettingsPanelOpen: boolean;
   isSearchOpen: boolean;
+  isBookmarksOpen: boolean;
   toggleSurahSidebar: () => void;
   setSurahSidebarOpen: (open: boolean) => void;
   toggleSettingsPanel: () => void;
   setSettingsPanelOpen: (open: boolean) => void;
   toggleSearch: () => void;
   setSearchOpen: (open: boolean) => void;
+  toggleBookmarks: () => void;
+  setBookmarksOpen: (open: boolean) => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
   isSurahSidebarOpen: true,
   isSettingsPanelOpen: false,
   isSearchOpen: false,
-  toggleSurahSidebar: () => set((s) => ({ isSurahSidebarOpen: !s.isSurahSidebarOpen })),
+  isBookmarksOpen: false,
+  toggleSurahSidebar: () =>
+    set((s) => ({ isSurahSidebarOpen: !s.isSurahSidebarOpen })),
   setSurahSidebarOpen: (open) => set({ isSurahSidebarOpen: open }),
   toggleSettingsPanel: () =>
     set((s) => ({
       isSettingsPanelOpen: !s.isSettingsPanelOpen,
       isSearchOpen: false,
+      isBookmarksOpen: false,
     })),
-  setSettingsPanelOpen: (open) => set({ isSettingsPanelOpen: open }),
+  setSettingsPanelOpen: (open) =>
+    set((state) => ({
+      ...state,
+      isSettingsPanelOpen: open,
+      ...(open ? { isSearchOpen: false, isBookmarksOpen: false } : {}),
+    })),
   toggleSearch: () =>
     set((s) => ({
       isSearchOpen: !s.isSearchOpen,
       isSettingsPanelOpen: false,
+      isBookmarksOpen: false,
     })),
-  setSearchOpen: (open) => set({ isSearchOpen: open }),
+  setSearchOpen: (open) =>
+    set((state) => ({
+      ...state,
+      isSearchOpen: open,
+      ...(open ? { isSettingsPanelOpen: false, isBookmarksOpen: false } : {}),
+    })),
+  toggleBookmarks: () =>
+    set((s) => ({
+      isBookmarksOpen: !s.isBookmarksOpen,
+      isSearchOpen: false,
+      isSettingsPanelOpen: false,
+    })),
+  setBookmarksOpen: (open) =>
+    set((state) => ({
+      ...state,
+      isBookmarksOpen: open,
+      ...(open ? { isSearchOpen: false, isSettingsPanelOpen: false } : {}),
+    })),
 }));
+
+// ── Bookmark Store ─────────────────────────────────────────────
+export interface BookmarkItem {
+  id: string;
+  surahNumber: number;
+  surahName: string;
+  surahEnglishName: string;
+  ayahNumber: number;
+  text: string;
+  translation: string;
+  banglaTranslation?: string;
+  createdAt: number;
+}
+
+interface BookmarkStore {
+  bookmarks: BookmarkItem[];
+  addBookmark: (bookmark: Omit<BookmarkItem, "createdAt">) => void;
+  removeBookmark: (id: string) => void;
+  toggleBookmark: (bookmark: Omit<BookmarkItem, "createdAt">) => void;
+  isBookmarked: (id: string) => boolean;
+  clearBookmarks: () => void;
+}
+
+export const useBookmarkStore = create<BookmarkStore>()(
+  persist(
+    (set, get) => ({
+      bookmarks: [],
+      addBookmark: (bookmark) =>
+        set((state) => {
+          if (state.bookmarks.some((b) => b.id === bookmark.id)) {
+            return state;
+          }
+          return {
+            bookmarks: [
+              { ...bookmark, createdAt: Date.now() },
+              ...state.bookmarks,
+            ],
+          };
+        }),
+      removeBookmark: (id) =>
+        set((state) => ({
+          bookmarks: state.bookmarks.filter((b) => b.id !== id),
+        })),
+      toggleBookmark: (bookmark) => {
+        if (get().bookmarks.some((b) => b.id === bookmark.id)) {
+          get().removeBookmark(bookmark.id);
+          return;
+        }
+        get().addBookmark(bookmark);
+      },
+      isBookmarked: (id) => get().bookmarks.some((b) => b.id === id),
+      clearBookmarks: () => set({ bookmarks: [] }),
+    }),
+    { name: "quran-bookmarks" },
+  ),
+);
 
 // ── Theme Store ───────────────────────────────────────────────
 interface ThemeStore {
@@ -106,6 +200,27 @@ export const useThemeStore = create<ThemeStore>()(
         }
       },
     }),
-    { name: "quran-theme" }
-  )
+    { name: "quran-theme" },
+  ),
+);
+
+// ── App Settings Store ───────────────────────────────────────
+interface AppSettingsStore {
+  showBanglaTranslation: boolean;
+  setShowBanglaTranslation: (v: boolean) => void;
+  banglaPrimary: boolean;
+  setBanglaPrimary: (v: boolean) => void;
+}
+
+export const useAppSettingsStore = create<AppSettingsStore>()(
+  persist(
+    (set) => ({
+      showBanglaTranslation: true,
+      banglaPrimary: false,
+      setShowBanglaTranslation: (v: boolean) =>
+        set({ showBanglaTranslation: v }),
+      setBanglaPrimary: (v: boolean) => set({ banglaPrimary: v }),
+    }),
+    { name: "quran-settings" },
+  ),
 );

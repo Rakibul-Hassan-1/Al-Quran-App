@@ -3,6 +3,7 @@ export interface Ayah {
   numberInQuran: number;
   text: string;
   translation: string;
+  banglaTranslation?: string;
   surahNumber: number;
   page?: number;
   juz?: number;
@@ -36,6 +37,7 @@ export interface SearchResult {
   numberInQuran: number;
   text: string;
   translation: string;
+  banglaTranslation?: string;
   audioUrl: string;
 }
 

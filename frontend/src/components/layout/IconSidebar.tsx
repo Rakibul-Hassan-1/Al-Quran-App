@@ -1,21 +1,31 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import {
-  BookOpen, Search, Settings, List, Bookmark, Sun, Moon, HelpCircle,
-} from "lucide-react";
-import { useUIStore, useThemeStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { useThemeStore, useUIStore } from "@/store";
+import {
+  Bookmark,
+  BookOpen,
+  List,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function IconSidebar() {
-  const { toggleSurahSidebar, toggleSearch, toggleSettingsPanel } = useUIStore();
+  const {
+    toggleSurahSidebar,
+    toggleSearch,
+    toggleSettingsPanel,
+    toggleBookmarks,
+  } = useUIStore();
   const { isDark, toggle } = useThemeStore();
 
   const topItems = [
     { icon: List, label: "Surah List", action: toggleSurahSidebar },
     { icon: Search, label: "Search", action: toggleSearch },
-    { icon: Bookmark, label: "Bookmarks" },
+    { icon: Bookmark, label: "Bookmarks", action: toggleBookmarks },
   ];
 
   const bottomItems = [
@@ -53,7 +63,16 @@ export default function IconSidebar() {
   );
 }
 
-function SidebarButton({ item }: { item: { icon: React.ElementType; label: string; action?: () => void; href?: string } }) {
+function SidebarButton({
+  item,
+}: {
+  item: {
+    icon: React.ElementType;
+    label: string;
+    action?: () => void;
+    href?: string;
+  };
+}) {
   const Icon = item.icon;
 
   const button = (
@@ -63,7 +82,7 @@ function SidebarButton({ item }: { item: { icon: React.ElementType; label: strin
       className={cn(
         "w-10 h-10 rounded-lg flex items-center justify-center",
         "text-[#5e6485] hover:text-[#e8e8f0] hover:bg-[#2a2f47]",
-        "transition-all duration-150 group relative"
+        "transition-all duration-150 group relative",
       )}
     >
       <Icon size={20} />

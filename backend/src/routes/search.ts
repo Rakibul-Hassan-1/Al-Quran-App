@@ -11,10 +11,13 @@ searchRoutes.get("/", async (c) => {
   const page = Math.max(parseInt(c.req.query("page") || "1"), 1);
 
   if (!query || query.length < 2) {
-    return c.json({
-      success: false,
-      error: "Query must be at least 2 characters",
-    }, 400);
+    return c.json(
+      {
+        success: false,
+        error: "Query must be at least 2 characters",
+      },
+      400,
+    );
   }
 
   try {
@@ -25,9 +28,14 @@ searchRoutes.get("/", async (c) => {
     for (const surah of data.surahs) {
       for (const ayah of surah.ayahs) {
         const matchesArabic = ayah.text.includes(query);
-        const matchesTranslation = ayah.translation.toLowerCase().includes(queryLower);
+        const matchesTranslation = ayah.translation
+          .toLowerCase()
+          .includes(queryLower);
+        const matchesBangla = ayah.banglaTranslation
+          ? ayah.banglaTranslation.toLowerCase().includes(queryLower)
+          : false;
 
-        if (matchesArabic || matchesTranslation) {
+        if (matchesArabic || matchesTranslation || matchesBangla) {
           results.push({
             surahNumber: surah.number,
             surahName: surah.name,
@@ -36,6 +44,7 @@ searchRoutes.get("/", async (c) => {
             numberInQuran: ayah.numberInQuran,
             text: ayah.text,
             translation: ayah.translation,
+            banglaTranslation: ayah.banglaTranslation,
             audioUrl: ayah.audioUrl,
           });
         }
