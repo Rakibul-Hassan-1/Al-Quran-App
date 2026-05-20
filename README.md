@@ -1,6 +1,6 @@
 # Quran Web Application
 
-A full-stack Quran web application cloning [QuranMazid](https://quranmazid.com/1) with enhanced features.
+A full-stack Quran web application with enhanced features.
 
 ## Tech Stack
 
