@@ -11,15 +11,10 @@ import type { ApiResponse, SearchApiResponse, Surah, SurahMeta } from "@/types";
 // }
 
 function resolveApiUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-
-  // Production OR CI build
-  if (envUrl) {
-    return envUrl;
-  }
-
-  // Local development only
-  return "http://localhost:3001";
+  return (
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3001"
+  );
 }
 
 const API_URL = resolveApiUrl();
