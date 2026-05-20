@@ -1,13 +1,25 @@
 import type { ApiResponse, SearchApiResponse, Surah, SurahMeta } from "@/types";
 
+// function resolveApiUrl() {
+//   const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+
+//   if (process.env.NODE_ENV !== "production") {
+//     return "http://localhost:3001";
+//   }
+
+//   return envUrl || "http://localhost:3001";
+// }
+
 function resolveApiUrl() {
   const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
 
-  if (process.env.NODE_ENV !== "production") {
-    return "http://localhost:3001";
+  // Production OR CI build
+  if (envUrl) {
+    return envUrl;
   }
 
-  return envUrl || "http://localhost:3001";
+  // Local development only
+  return "http://localhost:3001";
 }
 
 const API_URL = resolveApiUrl();
@@ -17,7 +29,8 @@ async function fetchApi<T>(path: string): Promise<T> {
 
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
-    next: { revalidate: 3600 }, // Cache 1 hour for SSG
+    // next: { revalidate: 3600 }, // Cache 1 hour for SSG
+    cache: "no-store",
   });
 
   if (!res.ok) {
